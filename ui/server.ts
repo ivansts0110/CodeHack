@@ -1,4 +1,5 @@
 import express, { Request, Response } from 'express';
+import { execFile } from 'child_process';
 
 const app = express();
 app.use(express.json());
@@ -35,7 +36,13 @@ app.post('/api/run', async (req: Request, res: Response) => {
     return res.status(400).json({ error: 'prompt is required' });
   }
   try {
-    return res.json({ result: `Running: ${prompt}` });
+    const output = await new Promise<string>((resolve, reject) => {
+      execFile('claude', ['-p', prompt, '--model', currentModel], (err, stdout, stderr) => {
+        if (err) reject(new Error(stderr || err.message));
+        else resolve(stdout);
+      });
+    });
+    return res.json({ result: output });
   } catch (e) {
     return res.status(500).json({ error: e instanceof Error ? e.message : 'unknown' });
   }
