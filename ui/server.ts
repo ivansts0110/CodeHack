@@ -1,8 +1,10 @@
 import express, { Request, Response } from 'express';
 import { execFile } from 'child_process';
+import path from 'path';
 
 const app = express();
 app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
 
 let currentModel = 'claude-sonnet-4-6';
 
